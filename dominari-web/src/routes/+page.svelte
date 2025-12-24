@@ -28,7 +28,7 @@
     </div>
 
     <h1 class="text-2xl font-bold text-emerald-600 mt-6 tracking-tight">
-        Dominari Cloud
+        Dominari Cloud XXXX
     </h1>
     
     <div class="flex items-center space-x-2 mt-2">
