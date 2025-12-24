@@ -26,7 +26,7 @@
     <aside class="w-full md:w-64 bg-slate-900 text-white {isMenuOpen ? 'flex' : 'hidden'} md:flex flex-col">
         <div class="p-6 text-xl font-bold border-b border-slate-800 hidden md:block">Dominari</div>
         <nav class="p-4 flex-1 space-y-2">
-            <a href="/dashboard" on:click={() => isMenuOpen = false} class="block p-3 hover:bg-slate-800 rounded-lg">Genel Bakış</a>
+            <a href="/dashboard" on:click={() => isMenuOpen = false} class="block p-3 hover:bg-slate-800 rounded-lg">📊Genel Bakış</a>
             <a href="/dashboard/clients" on:click={() => isMenuOpen = false} class="block p-3 hover:bg-slate-800 rounded-lg">👥Müşteriler</a>
             <a href="/dashboard/staff" on:click={() => isMenuOpen = false} class="block p-3 hover:bg-slate-800 rounded-lg">👷🏻Personel</a>
         </nav>
