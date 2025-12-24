@@ -3,6 +3,8 @@
     import { userSession } from '$lib/stores/userStore';
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
+    
+    let isMenuOpen = false; // Menü kapalı başlasın
 
     onMount(() => {
         if (!$userSession.isLoggedIn) {
@@ -13,13 +15,20 @@
     });
 </script>
 
-<div class="min-h-screen bg-gray-50 flex">
-    <aside class="w-64 bg-slate-900 text-white hidden md:flex flex-col">
-        <div class="p-6 text-xl font-bold border-b border-slate-800">Dominari</div>
+<div class="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+    <div class="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center">
+        <div class="text-xl font-bold">Dominari</div>
+        <button on:click={() => isMenuOpen = !isMenuOpen} class="text-2xl">
+            {isMenuOpen ? '✕' : '☰'}
+        </button>
+    </div>
+
+    <aside class="w-full md:w-64 bg-slate-900 text-white {isMenuOpen ? 'flex' : 'hidden'} md:flex flex-col">
+        <div class="p-6 text-xl font-bold border-b border-slate-800 hidden md:block">Dominari</div>
         <nav class="p-4 flex-1 space-y-2">
-            <a href="/dashboard" class="block p-3 hover:bg-slate-800 rounded-lg">Genel Bakış</a>
-            <a href="/dashboard/clients" class="block p-3 hover:bg-slate-800 rounded-lg">Müşteriler</a>
-            <a href="/dashboard/staff" class="block p-3 hover:bg-slate-800 rounded-lg">👷🏻Personel</a>
+            <a href="/dashboard" on:click={() => isMenuOpen = false} class="block p-3 hover:bg-slate-800 rounded-lg">Genel Bakış</a>
+            <a href="/dashboard/clients" on:click={() => isMenuOpen = false} class="block p-3 hover:bg-slate-800 rounded-lg">Müşteriler</a>
+            <a href="/dashboard/staff" on:click={() => isMenuOpen = false} class="block p-3 hover:bg-slate-800 rounded-lg">👷🏻Personel</a>
         </nav>
         <div class="p-4 border-t border-slate-800">
             <button on:click={() => goto('/select-office')} class="text-sm text-slate-400 hover:text-white">
@@ -36,7 +45,8 @@
             </span>
         </header>
 
-        <div class="p-8">
-            <slot /> </div>
+        <div class="p-4 md:p-8">
+            <slot />
+        </div>
     </main>
 </div>
