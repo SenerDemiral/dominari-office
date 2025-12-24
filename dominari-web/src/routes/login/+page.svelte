@@ -33,7 +33,7 @@
     <div class="max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-lg border border-gray-100">
         <div class="text-center">
             <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
-                Dominari SaaS
+                Dominari SaaS xxx
             </h2>
             <p class="mt-2 text-sm text-gray-600">
                 Lütfen giriş bilgilerinizi girin
