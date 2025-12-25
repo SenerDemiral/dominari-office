@@ -1,0 +1,111 @@
+services:
+  traefik:
+    image: "traefik"
+    restart: always
+    command:
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
+      - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
+      - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - traefik_data:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - n8n_network # Yeni network'e eklendi
+
+  postgres:
+    image: postgres:16 # Kararlı bir PostgreSQL imajı
+    restart: always
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      # Veritabanı kimlik bilgileri. Güvenlik için gerçek projede güçlü şifreler kullanın.
+      - POSTGRES_USER=${POSTGRES_USER:-n8n} # Eğer .env'de tanımlı değilse "n8n" kullanır
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-n8n_password}
+      - POSTGRES_DB=${POSTGRES_DB:-n8n}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Verilerin kalıcı olması için volume
+    networks:
+      - n8n_network # Yeni network'e eklendi
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - "127.0.0.1:5678:5678"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.n8n.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)
+      - traefik.http.routers.n8n.tls=true
+      - traefik.http.routers.n8n.entrypoints=web,websecure
+      - traefik.http.routers.n8n.tls.certresolver=mytlschallenge
+      - traefik.http.middlewares.n8n.headers.SSLRedirect=true
+      - traefik.http.middlewares.n8n.headers.STSSeconds=315360000
+      - traefik.http.middlewares.n8n.headers.browserXSSFilter=true
+      - traefik.http.middlewares.n8n.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.n8n.headers.forceSTSHeader=true
+      - traefik.http.middlewares.n8n.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.n8n.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.n8n.headers.STSPreload=true
+      - traefik.http.routers.n8n.middlewares=n8n@docker
+    environment:
+      - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - N8N_PROXY_HOPS=1
+      # n8n'in PostgreSQL kullanması için gerekli yeni ortam değişkenleri
+      - DB_TYPE=postgresdb
+      # Host olarak 'postgres' servisi adı kullanılır
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      # postgres servisinde tanımlanan değişkenler ile eşleşmeli
+      - DB_POSTGRESDB_USER=${POSTGRES_USER:-n8n}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-n8n_password}
+      - DB_POSTGRESDB_DATABASE=n8n
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - /local-files:/files
+    depends_on:
+      - postgres # n8n'in postgres'ten sonra başlamasını sağlar
+      - redis    # n8n'in redis'ten sonra başlamasını sağlar
+    networks:
+      - n8n_network # Yeni network'e eklendi
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      # Verilerinizi kalıcı olarak tutmak için bir volume tanımlayın
+      - redis_data:/data 
+    networks:
+      # n8n'in Redis'e 'redis' hostname'i ile erişmesini sağlar
+      - n8n_network # veya mevcut Traefik ağınızın adı
+
+volumes:
+  traefik_data:
+    external: true
+  n8n_data:
+    external: true
+  postgres_data: # PostgreSQL verileri için yeni volume
+    external: true
+  redis_data: # Redis verileri için yeni volume
+    external: true
+  
+networks:
+  n8n_network: # Servislerin birbiriyle iletişim kurmasını sağlayan yeni network
+    driver: bridge
+
