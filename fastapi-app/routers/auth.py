@@ -13,7 +13,8 @@ router = APIRouter(tags=["Auth"])
 # Bu satır FastAPI'ye "Token'ı Header'dan al" emrini verir
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
 
-SECRET_KEY = "senin_cok_gizli_anahtarin"
+
+os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 # Token'dan user_id'yi çıkaran asıl kahraman

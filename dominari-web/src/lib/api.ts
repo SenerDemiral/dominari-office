@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api.dominari.cloud';
+const BASE_URL = '/api';
 
 export async function apiRequest(endpoint: string, method = 'GET', data = null) {
     const token = localStorage.getItem('token'); // Veya store'dan al
