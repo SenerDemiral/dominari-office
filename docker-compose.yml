@@ -79,7 +79,7 @@ services:
       - /local-files:/files
     depends_on:
       - postgres # n8n'in postgres'ten sonra başlamasını sağlar
-      - redis    # n8n'in redis'ten sonra başlamasını sağlar
+      - redis # n8n'in redis'ten sonra başlamasını sağlar
     networks:
       - n8n_network # Yeni network'e eklendi
 
@@ -90,7 +90,7 @@ services:
     command: redis-server --appendonly yes
     volumes:
       # Verilerinizi kalıcı olarak tutmak için bir volume tanımlayın
-      - redis_data:/data 
+      - redis_data:/data
     networks:
       # n8n'in Redis'e 'redis' hostname'i ile erişmesini sağlar
       - n8n_network # veya mevcut Traefik ağınızın adı
@@ -98,6 +98,8 @@ services:
   fastapi:
     build: ./fastapi-app
     container_name: fastapi_app
+    env_file:
+      - .env
     restart: always
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-n8n}:${POSTGRES_PASSWORD:-n8n_password}@postgres:5432/officedb
@@ -142,12 +144,14 @@ volumes:
     external: true
   n8n_data:
     external: true
-  postgres_data: # PostgreSQL verileri için yeni volume
+  postgres_data:
+    # PostgreSQL verileri için yeni volume
     external: true
-  redis_data: # Redis verileri için yeni volume
+  redis_data:
+    # Redis verileri için yeni volume
     external: true
-  
-networks:
-  n8n_network: # Servislerin birbiriyle iletişim kurmasını sağlayan yeni network
-    driver: bridge
 
+networks:
+  n8n_network:
+    # Servislerin birbiriyle iletişim kurmasını sağlayan yeni network
+    driver: bridge

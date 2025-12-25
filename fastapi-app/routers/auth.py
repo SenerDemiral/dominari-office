@@ -4,6 +4,8 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 import jwt
 import json
+from dotenv import load_dotenv
+import os
 from database import db # database.py'dan havuzu çekiyoruz
 from datetime import datetime
 
@@ -13,8 +15,11 @@ router = APIRouter(tags=["Auth"])
 # Bu satır FastAPI'ye "Token'ı Header'dan al" emrini verir
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
 
+load_dotenv()  # Bu komut .env dosyasındaki her şeyi sistem hafızasına yükler
+SECRET_KEY = os.getenv("SECRET_KEY")
+# SECRET_KEY = os.getenv("SECRET_KEY")
+# SECRET_KEY = "senin_cok_gizli_anahtarin"
 
-os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 # Token'dan user_id'yi çıkaran asıl kahraman
